@@ -1,0 +1,57 @@
+{
+    "boards": [
+        {
+            "id": "board-1",
+            "name": "Board 1",
+            "columnOrder": ["column-1", "column-2"],
+            "columns": [
+                {
+                    "id": "column-1",
+                    "boardId": "board-1",
+                    "name": "Column-1",
+                    "cardOrder": ["card-1", "card-2", "card-3"],
+                    "cards": [
+                        {
+                            "id": "card-1",
+                            "columnId": "column-1",
+                            "title": "Card 1",
+                            "thumbnail": "https://images.pexels.com/photos/3921014/pexels-photo-3921014.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                        },
+                        {
+                            "id": "card-2",
+                            "columnId": "column-1",
+                            "title": "Card 2",
+                            "thumbnail": "https://images.pexels.com/photos/8189072/pexels-photo-8189072.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+                        },
+                        {
+                            "id": "card-3",
+                            "columnId": "column-1",
+                            "title": "Card 3",
+                            "thumbnail": null
+                        }
+                    ]
+                },
+                {
+                    "id": "column-2",
+                    "boardId": "board-1",
+                    "name": "Column-2",
+                    "cardOrder": ["card-5", "card-4"],
+                    "cards": [
+                        {
+                            "id": "card-4",
+                            "columnId": "column-2",
+                            "title": "Card 4",
+                            "thumbnail": null
+                        },
+                        {
+                            "id": "card-5",
+                            "columnId": "column-2",
+                            "title": "Card 5",
+                            "thumbnail": null
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
