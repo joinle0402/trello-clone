@@ -58,6 +58,13 @@ function BoardContent() {
         }
     };
 
+    const deleteBoardColumn = (columnId) => {
+        const newColumns = [...columns];
+        const deletedIndex = newColumns.findIndex((item) => item.id === columnId);
+        newColumns.splice(deletedIndex, 1);
+        setColumns(newColumns);
+    };
+
     return (
         <div className="flex items-start gap-3 p-3 overflow-x-auto overflow-y-hidden bg-blue-700 scrollbar">
             <Container
@@ -73,7 +80,12 @@ function BoardContent() {
             >
                 {columns.map((column, index) => (
                     <Draggable key={index} className="pl-3 first:pl-0">
-                        <BoardColumn key={index} column={column} onColumnCardDrog={onColumnCardDrog} />
+                        <BoardColumn
+                            key={index}
+                            column={column}
+                            onColumnCardDrog={onColumnCardDrog}
+                            deleteBoardColumn={deleteBoardColumn}
+                        />
                     </Draggable>
                 ))}
             </Container>
@@ -95,13 +107,13 @@ function BoardContent() {
                     <span>Thêm danh sách khác</span>
                 </div>
             ) : (
-                <div className="bg-blue-100 rounded w-80 min-w-[320px] max-h-full board-column ml-1" >
+                <div className="bg-blue-100 rounded w-80 min-w-[320px] max-h-full board-column ml-1">
                     <div className="px-2 py-1">
                         <input
                             type="text"
                             id="first_name"
                             className="block w-full p-2 text-sm text-gray-900 border border-gray-400 rounded bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="John"
+                            placeholder="Board content title"
                             ref={inputNewColumnRef}
                             value={newColumnTitle}
                             onChange={(e) => setNewColumnTitle(e.target.value)}
