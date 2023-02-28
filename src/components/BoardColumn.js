@@ -6,9 +6,20 @@ import ColumnCard from "components/ColumnCard";
 import { mapOrder } from "utilities/sorts";
 import { classNames } from "utilities/classNames";
 import Modal from "./Modal";
+import useContentEditable from "hooks/useContentEditable";
 
-function BoardColumn({ column, onColumnCardDrog, deleteBoardColumn }) {
+function BoardColumn({ column, onColumnCardDrog, deleteBoardColumn, onUpdateColumnName }) {
     const [isOpenModal, setIsOpenModal] = useState(false);
+    const {
+        content,
+        onContentEditableChange,
+        onContentEditableClick,
+        onContentEditableKeyDown,
+        onContentEditableMouseDown,
+    } = useContentEditable({
+        initialContent: column.name,
+    });
+
     const cards = mapOrder(column.cards, column.cardOrder, "id");
 
     const handleButtonDeleteClick = () => {
@@ -16,6 +27,13 @@ function BoardColumn({ column, onColumnCardDrog, deleteBoardColumn }) {
             deleteBoardColumn(column.id);
         }
         setIsOpenModal(false);
+    };
+
+    const handleUpdateColumnName = (event) => {
+        onUpdateColumnName({
+            columnId: column.id,
+            columnName: content,
+        });
     };
 
     return (
@@ -27,9 +45,12 @@ function BoardColumn({ column, onColumnCardDrog, deleteBoardColumn }) {
                 >
                     <input
                         type="text"
-                        id="first_name"
-                        value={column.name}
-                        onChange={() => console.log(column.name)}
+                        value={content}
+                        onChange={onContentEditableChange}
+                        onClick={onContentEditableClick}
+                        onBlur={handleUpdateColumnName}
+                        onKeyDown={onContentEditableKeyDown}
+                        onMouseDown={onContentEditableMouseDown}
                         className="flex-1 p-1 text-sm font-semibold text-gray-900 border rounded bg-inherit focus:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                         required
                     />

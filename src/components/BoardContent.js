@@ -65,6 +65,23 @@ function BoardContent() {
         setColumns(newColumns);
     };
 
+    const handleUpdateColumnName = ({ columnName, columnId }) => {
+        const updatedColumns = [...columns];
+        const columnIndexToUpdate = updatedColumns.findIndex((item) => item.id === columnId);
+        const newColumnToUpdate = {
+            ...updatedColumns[columnIndexToUpdate],
+            name: columnName,
+        };
+        updatedColumns.splice(columnIndexToUpdate, 1, newColumnToUpdate);
+        setColumns(updatedColumns);
+        console.log(`BoardContent.handleUpdateColumnName: `, {
+            columnName,
+            columnId,
+            columnIndexToUpdate,
+            newColumnToUpdate,
+        });
+    };
+
     return (
         <div className="flex items-start gap-3 p-3 overflow-x-auto overflow-y-hidden bg-blue-700 scrollbar">
             <Container
@@ -85,6 +102,7 @@ function BoardContent() {
                             column={column}
                             onColumnCardDrog={onColumnCardDrog}
                             deleteBoardColumn={deleteBoardColumn}
+                            onUpdateColumnName={handleUpdateColumnName}
                         />
                     </Draggable>
                 ))}
