@@ -7,9 +7,13 @@ import { mapOrder } from "utilities/sorts";
 import { classNames } from "utilities/classNames";
 import Modal from "./Modal";
 import useContentEditable from "hooks/useContentEditable";
+import useOpenAddForm from "hooks/useOpenAddForm";
 
-function BoardColumn({ column, onColumnCardDrog, deleteBoardColumn, onUpdateColumnName }) {
+function BoardColumn({ column, onColumnCardDrog, onDeleteColumn, onUpdateColumn }) {
     const [isOpenModal, setIsOpenModal] = useState(false);
+    const { isOpenAddForm, openForm, closeForm, contentRef, newContent, onNewContentChange, resetForm } =
+        useOpenAddForm();
+
     const {
         content,
         onContentEditableChange,
@@ -23,17 +27,34 @@ function BoardColumn({ column, onColumnCardDrog, deleteBoardColumn, onUpdateColu
     const cards = mapOrder(column.cards, column.cardOrder, "id");
 
     const handleButtonDeleteClick = () => {
-        if (deleteBoardColumn) {
-            deleteBoardColumn(column.id);
+        if (onDeleteColumn) {
+            onDeleteColumn(column.id);
         }
         setIsOpenModal(false);
     };
 
     const handleUpdateColumnName = (event) => {
-        onUpdateColumnName({
-            columnId: column.id,
-            columnName: content,
-        });
+        const newColumn = {
+            ...column,
+            name: content,
+        };
+        onUpdateColumn(newColumn);
+    };
+
+    const createNewCard = () => {
+        if (newContent) {
+            const newCard = {
+                id: Date.now(),
+                name: newContent,
+                columnId: column.id,
+                thumbnail: "",
+            };
+            const newColumn = { ...column };
+            newColumn.cards = [...newColumn.cards, newCard];
+            newColumn.cardOrder = [...newColumn.cardOrder, newCard.id];
+            onUpdateColumn(newColumn);
+        }
+        resetForm();
     };
 
     return (
@@ -102,82 +123,96 @@ function BoardColumn({ column, onColumnCardDrog, deleteBoardColumn, onUpdateColu
                                         {({ active }) => (
                                             <span
                                                 href="#"
+                                                onClick={openForm}
                                                 className={classNames(
                                                     active ? "bg-gray-100 text-gray-900" : "text-gray-700",
                                                     "block px-4 py-2 text-sm"
                                                 )}
                                             >
-                                                Support
+                                                Add New Card
                                             </span>
                                         )}
                                     </Menu.Item>
-                                    <Menu.Item>
-                                        {({ active }) => (
-                                            <span
-                                                href="#"
-                                                className={classNames(
-                                                    active ? "bg-gray-100 text-gray-900" : "text-gray-700",
-                                                    "block px-4 py-2 text-sm"
-                                                )}
-                                            >
-                                                License
-                                            </span>
-                                        )}
-                                    </Menu.Item>
-                                    <form method="POST" action="#">
-                                        <Menu.Item>
-                                            {({ active }) => (
-                                                <button
-                                                    type="submit"
-                                                    className={classNames(
-                                                        active ? "bg-gray-100 text-gray-900" : "text-gray-700",
-                                                        "block w-full px-4 py-2 text-left text-sm"
-                                                    )}
-                                                >
-                                                    Sign out
-                                                </button>
-                                            )}
-                                        </Menu.Item>
-                                    </form>
                                 </div>
                             </Menu.Items>
                         </Transition>
                     </Menu>
                 </header>
-                {cards.length > 0 && (
-                    <ul className="max-h-[520px] overflow-auto scrollbar p-3">
-                        <Container
-                            {...column.props}
-                            groupName="board-column"
-                            onDrop={(dropResult) => onColumnCardDrog(column.id, dropResult)}
-                            getChildPayload={(index) => cards[index]}
-                            dragClass="column-card-ghost"
-                            dropClass="column-card-ghost-drop"
-                            dragHandleSelector=".column-card-drag-handle"
-                            dropPlaceholder={{
-                                animationDuration: 150,
-                                showOnTop: true,
-                                className: "column-card-drop-preview",
-                            }}
-                            dropPlaceholderAnimationDuration={200}
-                        >
-                            {cards.map((card, index) => (
-                                <Draggable key={card.id} className="mt-2 first:mt-0">
-                                    <ColumnCard key={index} card={card} />
-                                </Draggable>
-                            ))}
-                        </Container>
-                    </ul>
-                )}
+                <ul className="max-h-[520px] overflow-auto scrollbar p-3">
+                    <Container
+                        {...column.props}
+                        groupName="board-column"
+                        onDrop={(dropResult) => onColumnCardDrog(column.id, dropResult)}
+                        getChildPayload={(index) => cards[index]}
+                        dragClass="column-card-ghost"
+                        dropClass="column-card-ghost-drop"
+                        dragHandleSelector=".column-card-drag-handle"
+                        dropPlaceholder={{
+                            animationDuration: 150,
+                            showOnTop: true,
+                            className: "column-card-drop-preview",
+                        }}
+                        dropPlaceholderAnimationDuration={200}
+                    >
+                        {cards.map((card, index) => (
+                            <Draggable key={card.id} className="mt-2 first:mt-0">
+                                <ColumnCard key={index} card={card} />
+                            </Draggable>
+                        ))}
+
+                        {isOpenAddForm && (
+                            <textarea
+                                rows="4"
+                                className="block p-2.5 mt-2 w-full text-sm text-gray-900 bg-gray-50 rounded border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
+                                placeholder="Write your card..."
+                                ref={contentRef}
+                                defaultValue={newContent}
+                                onChange={onNewContentChange}
+                                onBlur={createNewCard}
+                                onKeyDown={(event) => event.key === "Enter" && event.target.blur()}
+                            ></textarea>
+
+                        )}
+                    </Container>
+                </ul>
 
                 <footer className="flex items-center h-10 p-3 border-t border-slate-300">
-                    <button className="w-full px-4 py-1 text-base font-bold text-white bg-blue-700 rounded">
-                        Add Item...
-                    </button>
+                    {isOpenAddForm && (
+                        <div className="flex items-center gap-3 py-1">
+                            <button
+                                type="button"
+                                onClick={createNewCard}
+                                className="px-2 py-2 text-sm font-medium text-white bg-blue-700 rounded hover:bg-blue-800"
+                            >
+                                Thêm thẻ
+                            </button>
+
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                strokeWidth="1.5"
+                                stroke="currentColor"
+                                className="w-6 h-6 cursor-pointer"
+                                onClick={closeForm}
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </div>
+                    )}
+
+                    {!isOpenAddForm && (
+                        <button
+                            className="w-full px-4 py-1 text-base font-bold text-white bg-blue-700 rounded"
+                            onClick={openForm}
+                        >
+                            Add Item
+                        </button>
+                    )}
                 </footer>
                 <Modal
                     title={`Delete board column modal`}
-                    description={`Are you sure you want to delete this board column? (${column.id})`}
+                    description={`Are you sure you want to delete this board column? (${column.name})`}
                     isOpen={isOpenModal}
                     setIsOpen={setIsOpenModal}
                     onButtonDeleteClick={handleButtonDeleteClick}

@@ -5,28 +5,21 @@ import BoardColumn from "components/BoardColumn";
 import database from "database/database.json";
 import { mapOrder } from "utilities/sorts";
 import { applyDrag } from "utilities/applyDrag";
+import useOpenAddForm from "hooks/useOpenAddForm";
 
 function BoardContent() {
+    const [columnsOrder, setColumnsOrder] = useState([]);
     const [columns, setColumns] = useState([]);
-    const [isOpenNewColumn, setIsOpenNewColumn] = useState(false);
-    const [newColumnTitle, setNewColumnTitle] = useState("");
-    const inputNewColumnRef = useRef();
+    const { isOpenAddForm, openForm, closeForm, contentRef, newContent, onNewContentChange, resetForm } =
+        useOpenAddForm();
 
     useEffect(() => {
         const foundBoard = database.boards.find((board) => board.id === "board-1");
         if (foundBoard) {
+            setColumnsOrder(foundBoard.columnOrder);
             setColumns(mapOrder(foundBoard.columns, foundBoard.columnOrder, "id"));
         }
     }, []);
-
-    useEffect(() => {
-        if (isOpenNewColumn && inputNewColumnRef.current) {
-            inputNewColumnRef.current.focus();
-            inputNewColumnRef.current.select();
-        }
-    }, [isOpenNewColumn]);
-
-    const toggleOpenNewColumn = () => setIsOpenNewColumn(!isOpenNewColumn);
 
     const onBoardColumnDrog = (dropResult) => {
         const copyColumns = [...columns];
@@ -44,43 +37,33 @@ function BoardContent() {
         }
     };
 
-    const createNewColumn = () => {
-        if (newColumnTitle) {
-            const newColumn = {
-                id: Date.now(),
-                name: newColumnTitle,
-                cards: [],
-                cardOrder: [],
-            };
-            setColumns([...columns, newColumn]);
-            setNewColumnTitle("");
-            setIsOpenNewColumn(false);
-        }
+    const handleUpdateColumn = (columnToUpdate) => {
+        const updatedColumns = [...columns];
+        const columnIndexToUpdate = updatedColumns.findIndex((item) => item.id === columnToUpdate.id);
+        updatedColumns.splice(columnIndexToUpdate, 1, columnToUpdate);
+        setColumns(updatedColumns);
     };
 
-    const deleteBoardColumn = (columnId) => {
+    const handleDeleteColumn = (columnId) => {
         const newColumns = [...columns];
         const deletedIndex = newColumns.findIndex((item) => item.id === columnId);
         newColumns.splice(deletedIndex, 1);
         setColumns(newColumns);
     };
 
-    const handleUpdateColumnName = ({ columnName, columnId }) => {
-        const updatedColumns = [...columns];
-        const columnIndexToUpdate = updatedColumns.findIndex((item) => item.id === columnId);
-        const newColumnToUpdate = {
-            ...updatedColumns[columnIndexToUpdate],
-            name: columnName,
-        };
-        updatedColumns.splice(columnIndexToUpdate, 1, newColumnToUpdate);
-        setColumns(updatedColumns);
-        console.log(`BoardContent.handleUpdateColumnName: `, {
-            columnName,
-            columnId,
-            columnIndexToUpdate,
-            newColumnToUpdate,
-        });
-    };
+    const handleCreateColumn = () => {
+        if (newContent) {
+            const newColumn = {
+                id: Date.now(),
+                name: newContent,
+                cards: [],
+                cardOrder: [],
+            };
+            setColumns([...columns, newColumn]);
+            setColumnsOrder([...columnsOrder, newColumn.id]);
+            resetForm();
+        }
+    }
 
     return (
         <div className="flex items-start gap-3 p-3 overflow-x-auto overflow-y-hidden bg-blue-700 scrollbar">
@@ -101,16 +84,16 @@ function BoardContent() {
                             key={index}
                             column={column}
                             onColumnCardDrog={onColumnCardDrog}
-                            deleteBoardColumn={deleteBoardColumn}
-                            onUpdateColumnName={handleUpdateColumnName}
+                            onDeleteColumn={handleDeleteColumn}
+                            onUpdateColumn={handleUpdateColumn}
                         />
                     </Draggable>
                 ))}
             </Container>
-            {!isOpenNewColumn ? (
+            {!isOpenAddForm ? (
                 <div
                     className="bg-blue-600 hover:bg-blue-500 cursor-pointer text-white rounded w-80 min-w-[320px] max-h-full board-column h-10 flex items-center gap-1 px-3 ml-1"
-                    onClick={toggleOpenNewColumn}
+                    onClick={openForm}
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -132,10 +115,11 @@ function BoardContent() {
                             id="first_name"
                             className="block w-full p-2 text-sm text-gray-900 border border-gray-400 rounded bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                             placeholder="Board content title"
-                            ref={inputNewColumnRef}
-                            value={newColumnTitle}
-                            onChange={(e) => setNewColumnTitle(e.target.value)}
-                            onKeyDown={(keyEvent) => keyEvent.key === "Enter" && createNewColumn()}
+                            ref={contentRef}
+                            value={newContent}
+                            onChange={onNewContentChange}
+                            onBlur={handleCreateColumn}
+                            onKeyDown={(event) => event.key === "Enter" && event.target.blur()}
                             required
                         />
                     </div>
@@ -143,7 +127,7 @@ function BoardContent() {
                         <button
                             type="button"
                             className="px-2 py-2 text-sm font-medium text-white bg-blue-700 rounded hover:bg-blue-800"
-                            onClick={createNewColumn}
+                            onClick={handleCreateColumn}
                         >
                             Thêm danh sách
                         </button>
@@ -155,7 +139,7 @@ function BoardContent() {
                             strokeWidth="1.5"
                             stroke="currentColor"
                             className="w-6 h-6 cursor-pointer"
-                            onClick={toggleOpenNewColumn}
+                            onClick={closeForm}
                         >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
                         </svg>

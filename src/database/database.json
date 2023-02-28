@@ -14,19 +14,19 @@
                         {
                             "id": "card-1",
                             "columnId": "column-1",
-                            "title": "Card 1",
+                            "name": "Card 1",
                             "thumbnail": "https://images.pexels.com/photos/3921014/pexels-photo-3921014.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
                         },
                         {
                             "id": "card-2",
                             "columnId": "column-1",
-                            "title": "Card 2",
+                            "name": "Card 2",
                             "thumbnail": "https://images.pexels.com/photos/8189072/pexels-photo-8189072.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
                         },
                         {
                             "id": "card-3",
                             "columnId": "column-1",
-                            "title": "Card 3",
+                            "name": "Card 3",
                             "thumbnail": null
                         }
                     ]
@@ -40,13 +40,13 @@
                         {
                             "id": "card-4",
                             "columnId": "column-2",
-                            "title": "Card 4",
+                            "name": "Card 4",
                             "thumbnail": null
                         },
                         {
                             "id": "card-5",
                             "columnId": "column-2",
-                            "title": "Card 5",
+                            "name": "Card 5",
                             "thumbnail": null
                         }
                     ]
