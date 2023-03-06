@@ -8,11 +8,20 @@ import { classNames } from "utilities/classNames";
 import Modal from "./Modal";
 import useContentEditable from "hooks/useContentEditable";
 import useOpenAddForm from "hooks/useOpenAddForm";
+import cardApi from "apis/cardApi";
+import { toast } from "react-toastify";
 
-function BoardColumn({ column, onColumnCardDrog, onDeleteColumn, onUpdateColumn }) {
+function BoardColumn({ column, onColumnCardDrog, onDeleteColumn, onUpdateColumn, onCreateCard }) {
     const [isOpenModal, setIsOpenModal] = useState(false);
-    const { isOpenAddForm, openForm, closeForm, contentRef, newContent, onNewContentChange, resetForm } =
-        useOpenAddForm();
+    const {
+        isOpenAddForm,
+        openForm,
+        closeForm,
+        contentRef,
+        newContent: newCardTitle,
+        onNewContentChange,
+        resetForm,
+    } = useOpenAddForm();
 
     const {
         content,
@@ -21,38 +30,54 @@ function BoardColumn({ column, onColumnCardDrog, onDeleteColumn, onUpdateColumn 
         onContentEditableKeyDown,
         onContentEditableMouseDown,
     } = useContentEditable({
-        initialContent: column.name,
+        initialContent: column.title,
     });
 
-    const cards = mapOrder(column.cards, column.cardOrder, "id");
+    const cards = mapOrder(column.cards, column.cardOrder, "_id");
 
     const handleButtonDeleteClick = () => {
         if (onDeleteColumn) {
-            onDeleteColumn(column.id);
+            onDeleteColumn(column._id);
         }
         setIsOpenModal(false);
     };
 
     const handleUpdateColumnName = (event) => {
-        const newColumn = {
-            ...column,
-            name: content,
-        };
-        onUpdateColumn(newColumn);
+        if (content !== column.title) {
+            const newColumn = {
+                ...column,
+                title: content,
+            };
+            onUpdateColumn(newColumn);
+        }
     };
 
     const createNewCard = () => {
-        if (newContent) {
+        if (newCardTitle) {
             const newCard = {
-                id: Date.now(),
-                name: newContent,
-                columnId: column.id,
-                thumbnail: "",
+                title: newCardTitle,
+                columnId: column._id,
             };
-            const newColumn = { ...column };
-            newColumn.cards = [...newColumn.cards, newCard];
-            newColumn.cardOrder = [...newColumn.cardOrder, newCard.id];
-            onUpdateColumn(newColumn);
+            cardApi
+                .createCard(newCard)
+                .then(({ message, createdCard, updatedColumn }) => {
+                    toast.success(message, {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "colored",
+                    });
+                    onCreateCard({
+                        createdCard,
+                        updatedColumn,
+                    });
+                })
+                .catch((error) => {
+                });
         }
         resetForm();
     };
@@ -142,7 +167,7 @@ function BoardColumn({ column, onColumnCardDrog, onDeleteColumn, onUpdateColumn 
                     <Container
                         {...column.props}
                         groupName="board-column"
-                        onDrop={(dropResult) => onColumnCardDrog(column.id, dropResult)}
+                        onDrop={(dropResult) => onColumnCardDrog(column._id, dropResult)}
                         getChildPayload={(index) => cards[index]}
                         dragClass="column-card-ghost"
                         dropClass="column-card-ghost-drop"
@@ -155,7 +180,7 @@ function BoardColumn({ column, onColumnCardDrog, onDeleteColumn, onUpdateColumn 
                         dropPlaceholderAnimationDuration={200}
                     >
                         {cards.map((card, index) => (
-                            <Draggable key={card.id} className="mt-2 first:mt-0">
+                            <Draggable key={index} className="mt-2 first:mt-0">
                                 <ColumnCard key={index} card={card} />
                             </Draggable>
                         ))}
@@ -166,12 +191,11 @@ function BoardColumn({ column, onColumnCardDrog, onDeleteColumn, onUpdateColumn 
                                 className="block p-2.5 mt-2 w-full text-sm text-gray-900 bg-gray-50 rounded border border-gray-300 focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500"
                                 placeholder="Write your card..."
                                 ref={contentRef}
-                                defaultValue={newContent}
+                                defaultValue={newCardTitle}
                                 onChange={onNewContentChange}
                                 onBlur={createNewCard}
                                 onKeyDown={(event) => event.key === "Enter" && event.target.blur()}
                             ></textarea>
-
                         )}
                     </Container>
                 </ul>
@@ -212,7 +236,7 @@ function BoardColumn({ column, onColumnCardDrog, onDeleteColumn, onUpdateColumn 
                 </footer>
                 <Modal
                     title={`Delete board column modal`}
-                    description={`Are you sure you want to delete this board column? (${column.name})`}
+                    description={`Are you sure you want to delete this board column? (${column.title})`}
                     isOpen={isOpenModal}
                     setIsOpen={setIsOpenModal}
                     onButtonDeleteClick={handleButtonDeleteClick}

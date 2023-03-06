@@ -1,6 +1,8 @@
 import AppBar from "components/AppBar";
 import BoardBar from "components/BoardBar";
 import BoardContent from "components/BoardContent";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function App() {
     return (
@@ -8,6 +10,7 @@ function App() {
             <AppBar />
             <BoardBar />
             <BoardContent />
+            <ToastContainer />
         </div>
     );
 }

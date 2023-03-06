@@ -4,7 +4,7 @@ function ColumnCard({ card }) {
             {!!card.thumbnail && (
                 <img src={card.thumbnail} alt="" className="mb-2" onMouseDown={(event) => event.preventDefault()} />
             )}
-            {card.name}
+            {card.title}
         </li>
     );
 }
