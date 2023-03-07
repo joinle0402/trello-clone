@@ -10,7 +10,7 @@ import { toast } from "react-toastify";
 import { cloneDeep } from "lodash";
 import cardApi from "apis/cardApi";
 
-const boardId = "6403077aedf2ef1d169dcbd6";
+let boardId = "";
 
 function BoardContent() {
     const [columnsOrder, setColumnsOrder] = useState([]);
@@ -20,9 +20,12 @@ function BoardContent() {
 
     useEffect(() => {
         async function fetchBoardById() {
-            const { board } = await boardApi.fetchBoardById("6403077aedf2ef1d169dcbd6");
-            setColumnsOrder(board.columnOrder);
-            setColumns(mapOrder(board.columns, board.columnOrder, "_id"));
+            const { boards } = await boardApi.fetchBoardList();
+            if (boards) {
+                boardId = boards[0]._id;
+                setColumnsOrder(boards[0].columnOrder);
+                setColumns(mapOrder(boards[0].columns, boards[0].columnOrder, "_id"));
+            }
         }
         fetchBoardById();
     }, []);
@@ -50,8 +53,7 @@ function BoardContent() {
                 });
                 setColumns(newColumns);
             })
-            .catch((error) => {
-            });
+            .catch((error) => {});
     };
 
     const onColumnCardDrog = (columnId, dropResult) => {
@@ -122,8 +124,7 @@ function BoardContent() {
                 updatedColumns.splice(columnIndexToUpdate, 1, columnToUpdate);
                 setColumns(updatedColumns);
             })
-            .catch((error) => {
-            });
+            .catch((error) => {});
     };
 
     const handleDeleteColumn = async (columnId) => {
@@ -145,8 +146,7 @@ function BoardContent() {
                 newColumns.splice(deletedIndex, 1);
                 setColumns(newColumns);
             })
-            .catch((error) => {
-            });
+            .catch((error) => {});
     };
 
     const handleCreateColumn = () => {
@@ -172,6 +172,9 @@ function BoardContent() {
                     resetForm();
                 })
                 .catch((error) => {
+                    console.log({
+                        error: error.response.data,
+                    });
                     toast.error("Column title already in use", {
                         position: "top-right",
                         autoClose: 5000,
@@ -198,35 +201,39 @@ function BoardContent() {
     };
 
     return (
-        <div className="flex items-start gap-3 p-3 overflow-x-auto overflow-y-hidden bg-blue-700 scrollbar">
-            <Container
-                orientation="horizontal"
-                onDrop={onBoardColumnDrog}
-                getChildPayload={(index) => columns[index]}
-                dragHandleSelector="#board-column-drag-handle"
-                dropPlaceholder={{
-                    animationDuration: 150,
-                    showOnTop: true,
-                    className: "board-column-drop-preview",
-                }}
-            >
-                {columns.map((column, index) => (
-                    <Draggable key={index} className="pl-3 first:pl-0">
-                        <BoardColumn
-                            key={index}
-                            column={column}
-                            onColumnCardDrog={onColumnCardDrog}
-                            onDeleteColumn={handleDeleteColumn}
-                            onUpdateColumn={handleUpdateColumn}
-                            onCreateCard={handleCreateCard}
-                        />
-                    </Draggable>
-                ))}
-            </Container>
+        <div className="flex items-start px-3 py-2 overflow-x-auto overflow-y-hidden bg-blue-700 scrollbar">
+            {columns.length > 0 && (
+                <div className="mr-3">
+                    <Container
+                        orientation="horizontal"
+                        onDrop={onBoardColumnDrog}
+                        getChildPayload={(index) => columns[index]}
+                        dragHandleSelector="#board-column-drag-handle"
+                        dropPlaceholder={{
+                            animationDuration: 150,
+                            showOnTop: true,
+                            className: "board-column-drop-preview",
+                        }}
+                    >
+                        {columns.map((column, index) => (
+                            <Draggable key={index} className="pl-3 first:pl-0">
+                                <BoardColumn
+                                    key={index}
+                                    column={column}
+                                    onColumnCardDrog={onColumnCardDrog}
+                                    onDeleteColumn={handleDeleteColumn}
+                                    onUpdateColumn={handleUpdateColumn}
+                                    onCreateCard={handleCreateCard}
+                                />
+                            </Draggable>
+                        ))}
+                    </Container>
+                </div>
+            )}
 
             {!isOpenAddForm ? (
                 <div
-                    className="bg-blue-600 hover:bg-blue-500 cursor-pointer text-white rounded w-80 min-w-[320px] max-h-full board-column h-10 flex items-center gap-1 px-3 ml-1"
+                    className="bg-blue-600 hover:bg-blue-500 cursor-pointer text-white rounded w-80 min-w-[320px] max-h-full h-10 flex items-center gap-1 px-3"
                     onClick={openForm}
                 >
                     <svg
