@@ -43,12 +43,10 @@ function BoardColumn({ column, onColumnCardDrog, onDeleteColumn, onUpdateColumn,
     };
 
     const handleUpdateColumnName = (event) => {
-        if (content !== column.title) {
-            const newColumn = {
-                ...column,
+        if (content.trim() !== '' && content.trim() !== column.title.trim()) {
+            onUpdateColumn(column._id, {
                 title: content,
-            };
-            onUpdateColumn(newColumn);
+            });
         }
     };
 
@@ -76,8 +74,7 @@ function BoardColumn({ column, onColumnCardDrog, onDeleteColumn, onUpdateColumn,
                         updatedColumn,
                     });
                 })
-                .catch((error) => {
-                });
+                .catch((error) => {});
         }
         resetForm();
     };

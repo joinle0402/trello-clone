@@ -24,7 +24,7 @@ function useContentEditable({ initialContent }) {
 
     const onContentEditableMouseDown = (event) => {
         event.preventDefault();
-    }
+    };
 
     return {
         content,

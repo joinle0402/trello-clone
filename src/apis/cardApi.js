@@ -7,8 +7,8 @@ const createCard = ({ title, columnId }) => {
     });
 };
 
-const updateCard = (cardToUpdate) => {
-    return axiosClient.put(`cards/${cardToUpdate._id}`, {
+const updateCard = (cardId, cardToUpdate) => {
+    return axiosClient.put(`cards/${cardId}`, {
         ...cardToUpdate,
     });
 };

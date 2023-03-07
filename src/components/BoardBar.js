@@ -5,7 +5,7 @@ function BoardBar() {
     return (
         <nav className="flex items-center justify-between px-3 text-base font-normal text-white bg-blue-700">
             <div className="flex items-center gap-2">
-                <button className="bg-blue-500 p-2 rounded cursor-pointer flex items-center gap-2">
+                <button className="bg-blue-500 hover:bg-blue-800 transition-all duration-300 p-2 rounded cursor-pointer flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                         <path
                             fillRule="evenodd"
@@ -16,7 +16,7 @@ function BoardBar() {
                     <span className="font-normal text-sm">Mern Stack Trello Clone</span>
                 </button>
                 <div className="w-[1px] h-[20px] bg-gray-100"></div>
-                <button className="bg-blue-500 p-2 rounded cursor-pointer flex items-center gap-2">
+                <button className="bg-blue-500 hover:bg-blue-800 transition-all duration-300 p-2 rounded cursor-pointer flex items-center gap-2">
                     <span className="font-normal text-sm">Private Workspace</span>
                 </button>
             </div>

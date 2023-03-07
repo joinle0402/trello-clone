@@ -19,41 +19,48 @@ function BoardContent() {
         useOpenAddForm();
 
     useEffect(() => {
-        async function fetchBoardById() {
+        async function fetchBoardList() {
             const { boards } = await boardApi.fetchBoardList();
-            if (boards) {
+            if (boards[0]) {
                 boardId = boards[0]._id;
                 setColumnsOrder(boards[0].columnOrder);
                 setColumns(mapOrder(boards[0].columns, boards[0].columnOrder, "_id"));
+            } else {
+                const { createdBoard } = await boardApi.createNewBoard({
+                    title: "Board 1",
+                });
+                boardId = createdBoard._id;
             }
         }
-        fetchBoardById();
+        fetchBoardList();
     }, []);
 
     const onBoardColumnDrog = (dropResult) => {
-        const cloneColumns = cloneDeep(columns);
-        const cloneColumnOrder = cloneDeep(columnsOrder);
-        const newColumns = applyDrag(cloneColumns, dropResult);
-        const newColumnOrder = applyDrag(cloneColumnOrder, dropResult);
-        boardApi
-            .updateBoard({
-                _id: boardId,
-                newColumnOrder,
-            })
-            .then(({ message }) => {
-                toast.success(message, {
-                    position: "top-right",
-                    autoClose: 5000,
-                    hideProgressBar: false,
-                    closeOnClick: true,
-                    pauseOnHover: true,
-                    draggable: true,
-                    progress: undefined,
-                    theme: "colored",
-                });
-                setColumns(newColumns);
-            })
-            .catch((error) => {});
+        if (dropResult.addedIndex !== dropResult.removedIndex) {
+            const cloneColumns = cloneDeep(columns);
+            const cloneColumnOrder = cloneDeep(columnsOrder);
+            const newColumns = applyDrag(cloneColumns, dropResult);
+            const newColumnOrder = applyDrag(cloneColumnOrder, dropResult);
+            boardApi
+                .updateBoard({
+                    _id: boardId,
+                    newColumnOrder,
+                })
+                .then(({ message }) => {
+                    toast.success(message, {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "colored",
+                    });
+                    setColumns(newColumns);
+                })
+                .catch((error) => {});
+        }
     };
 
     const onColumnCardDrog = (columnId, dropResult) => {
@@ -64,14 +71,19 @@ function BoardContent() {
             if (dropResult.addedIndex !== dropResult.removedIndex) {
                 const newColumns = [...columns];
                 const currentColumn = newColumns.find((item) => item._id === columnId);
-                currentColumn.cardOrder = applyDrag(currentColumn.cardOrder, dropResult);
-                currentColumn.cards = applyDrag(currentColumn.cards, dropResult);
+                currentColumn.cards = applyDrag([...currentColumn.cards], dropResult);
+
+                if (dropResult.addedIndex != null) {
+                    const currentCard = currentColumn.cards.find((item) => item._id === dropResult.payload._id);
+                    currentCard.column = currentColumn._id;
+                }
+
+                currentColumn.cardOrder = currentColumn.cards.map((card) => card._id);
                 setColumns(newColumns);
 
                 if (dropResult.removedIndex != null && dropResult.addedIndex != null) {
                     columnApi
-                        .updateColumn({
-                            _id: columnId,
+                        .updateColumn(columnId, {
                             cardOrder: currentColumn.cardOrder,
                             cards: currentColumn.cardOrder,
                         })
@@ -80,8 +92,7 @@ function BoardContent() {
                         });
                 } else {
                     columnApi
-                        .updateColumn({
-                            _id: columnId,
+                        .updateColumn(columnId, {
                             cardOrder: currentColumn.cardOrder,
                             cards: currentColumn.cardOrder,
                         })
@@ -90,10 +101,9 @@ function BoardContent() {
                         });
 
                     if (dropResult.addedIndex !== null) {
-                        const cardToUpdate = cloneDeep(dropResult.payload);
+                        const cardToUpdate = { ...dropResult.payload };
                         cardApi
-                            .updateCard({
-                                _id: cardToUpdate._id,
+                            .updateCard(cardToUpdate._id, {
                                 column: currentColumn._id,
                             })
                             .catch((error) => {
@@ -105,10 +115,12 @@ function BoardContent() {
         }
     };
 
-    const handleUpdateColumn = (columnToUpdate) => {
+    const handleUpdateColumn = (columnId, columnToUpdate) => {
         columnApi
-            .updateColumn({ columnToUpdate })
-            .then(({ message }) => {
+            .updateColumn(columnId, {
+                ...columnToUpdate,
+            })
+            .then(({ message, updatedColumn }) => {
                 toast.success(message, {
                     position: "top-right",
                     autoClose: 5000,
@@ -120,8 +132,8 @@ function BoardContent() {
                     theme: "colored",
                 });
                 const updatedColumns = [...columns];
-                const columnIndexToUpdate = updatedColumns.findIndex((item) => item._id === columnToUpdate._id);
-                updatedColumns.splice(columnIndexToUpdate, 1, columnToUpdate);
+                const columnIndexToUpdate = updatedColumns.findIndex((item) => item._id === columnId);
+                updatedColumns.splice(columnIndexToUpdate, 1, updatedColumn);
                 setColumns(updatedColumns);
             })
             .catch((error) => {});
@@ -150,7 +162,7 @@ function BoardContent() {
     };
 
     const handleCreateColumn = () => {
-        if (newContent) {
+        if (newContent !== "") {
             columnApi
                 .createColumn({
                     title: newContent,
@@ -171,30 +183,15 @@ function BoardContent() {
                     setColumnsOrder([...columnsOrder, createdColumn._id]);
                     resetForm();
                 })
-                .catch((error) => {
-                    console.log({
-                        error: error.response.data,
-                    });
-                    toast.error("Column title already in use", {
-                        position: "top-right",
-                        autoClose: 5000,
-                        hideProgressBar: false,
-                        closeOnClick: true,
-                        pauseOnHover: true,
-                        draggable: true,
-                        progress: undefined,
-                        theme: "colored",
-                    });
-                });
+                .catch((error) => {});
         }
     };
 
     const handleCreateCard = ({ createdCard, updatedColumn }) => {
         const newColumns = [...columns];
         const columnIndexToUpdate = newColumns.findIndex((item) => item._id === updatedColumn._id);
-
-        const columnToUpdate = { ...newColumns[columnIndexToUpdate] };
-        columnToUpdate.cards = [...columnToUpdate.cards, createdCard];
+        const columnToUpdate = newColumns[columnIndexToUpdate];
+        columnToUpdate.cards = [...columnToUpdate.cards, { ...createdCard }];
         columnToUpdate.cardOrder = [...columnToUpdate.cardOrder, createdCard._id];
         newColumns.splice(columnIndexToUpdate, 1, columnToUpdate);
         setColumns(newColumns);
@@ -233,7 +230,7 @@ function BoardContent() {
 
             {!isOpenAddForm ? (
                 <div
-                    className="bg-blue-600 hover:bg-blue-500 cursor-pointer text-white rounded w-80 min-w-[320px] max-h-full h-10 flex items-center gap-1 px-3"
+                    className="bg-blue-600 hover:bg-blue-500 transition-all duration-300 cursor-pointer text-white rounded w-80 min-w-[320px] max-h-full h-10 flex items-center gap-1 px-3"
                     onClick={openForm}
                 >
                     <svg
@@ -259,8 +256,7 @@ function BoardContent() {
                             ref={contentRef}
                             value={newContent}
                             onChange={onNewContentChange}
-                            onBlur={handleCreateColumn}
-                            onKeyDown={(event) => event.key === "Enter" && event.target.blur()}
+                            onKeyDown={(event) => event.key === "Enter" && handleCreateColumn()}
                             required
                         />
                     </div>

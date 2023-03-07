@@ -6,7 +6,7 @@ function AppBar() {
     return (
         <nav className="grid grid-cols-[5fr_2fr_5fr] gap-1 items-center px-3 text-lg font-medium text-white bg-blue-900">
             <div className="flex items-center gap-2">
-                <button className="bg-blue-500 p-2 rounded cursor-pointer">
+                <button className="bg-blue-500 hover:bg-blue-800 transition-all duration-300 p-2 rounded cursor-pointer">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -22,13 +22,13 @@ function AppBar() {
                         />
                     </svg>
                 </button>
-                <button className="bg-blue-500 p-2 rounded cursor-pointer">
+                <button className="bg-blue-500 hover:bg-blue-800 transition-all duration-300 p-2 rounded cursor-pointer">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                         <path d="M11.47 3.84a.75.75 0 011.06 0l8.69 8.69a.75.75 0 101.06-1.06l-8.689-8.69a2.25 2.25 0 00-3.182 0l-8.69 8.69a.75.75 0 001.061 1.06l8.69-8.69z" />
                         <path d="M12 5.432l8.159 8.159c.03.03.06.058.091.086v6.198c0 1.035-.84 1.875-1.875 1.875H15a.75.75 0 01-.75-.75v-4.5a.75.75 0 00-.75-.75h-3a.75.75 0 00-.75.75V21a.75.75 0 01-.75.75H5.625a1.875 1.875 0 01-1.875-1.875v-6.198a2.29 2.29 0 00.091-.086L12 5.43z" />
                     </svg>
                 </button>
-                <button className="bg-blue-500 p-2 rounded cursor-pointer flex items-center gap-2">
+                <button className="bg-blue-500 hover:bg-blue-800 transition-all duration-300 p-2 rounded cursor-pointer flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
                         <path
                             fillRule="evenodd"
@@ -38,7 +38,7 @@ function AppBar() {
                     </svg>
                     <span className="font-normal text-sm">Boards</span>
                 </button>
-                <div className="relative bg-blue-500 text-white rounded w-[300px] flex items-center">
+                <div className="relative bg-blue-500 hover:bg-blue-800 transition-all duration-300 text-white rounded w-[300px] flex items-center">
                     <input
                         type="text"
                         className="bg-transparent text-white w-full text-sm border-none outline-none py-2 pl-2 pr-9 rounded placeholder:text-white"
@@ -68,7 +68,7 @@ function AppBar() {
                 </h2>
             </div>
             <div className="flex gap-2 items-center justify-end">
-                <button className="bg-blue-500 p-2 rounded cursor-pointer">
+                <button className="bg-blue-500 hover:bg-blue-800 transition-all duration-300 p-2 rounded cursor-pointer">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -84,7 +84,7 @@ function AppBar() {
                         />
                     </svg>
                 </button>
-                <button className="bg-blue-500 p-2 rounded cursor-pointer">
+                <button className="bg-blue-500 hover:bg-blue-800 transition-all duration-300 p-2 rounded cursor-pointer">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -100,7 +100,7 @@ function AppBar() {
                         />
                     </svg>
                 </button>
-                <button className="bg-blue-500 p-2 rounded cursor-pointer">
+                <button className="bg-blue-500 hover:bg-blue-800 transition-all duration-300 p-2 rounded cursor-pointer">
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
                         fill="none"
@@ -116,7 +116,7 @@ function AppBar() {
                         />
                     </svg>
                 </button>
-                <button className="bg-blue-500 cursor-pointer rounded-full">
+                <button className="bg-blue-500 hover:bg-blue-800 transition-all duration-300 cursor-pointer rounded-full">
                     <img src={Images.avatar} alt="avatar" className="w-10 h-10 rounded-full object-cover" />
                 </button>
             </div>

@@ -7,10 +7,8 @@ const createColumn = ({ title, boardId }) => {
     });
 };
 
-const updateColumn = (columnToUpdate) => {
-    return axiosClient.put(`columns/${columnToUpdate._id}`, {
-        ...columnToUpdate,
-    });
+const updateColumn = (columnId, columnToUpdate) => {
+    return axiosClient.put(`columns/${columnId}`, { ...columnToUpdate });
 };
 
 const deleteColumnById = (columnId) => {
